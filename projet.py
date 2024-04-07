@@ -50,9 +50,9 @@ def LFSR_17(s, l):
 
 ## Pour tester ce LFSR :
 
-suite_test = '10110010100011000'    # remplacez par ce que vous voulez
-taille_sortie = 8   # remplacez par la taille souhaitée
-print(LFSR_17(suite_test, taille_sortie))
+s1_test = '10110010100011000'    # remplacez par ce que vous voulez
+taille_sortie_s1 = 8   # remplacez par la taille souhaitée
+#print(LFSR_17(s1_test, taille_sortie_s1))
 
 
 ### Implementer une fonction de test qui vérifie que l'état prend bien les 2^17 - 1 valeurs différentes
@@ -78,10 +78,38 @@ def test_LFSR17():
 
 
 ## Pour tester que la fonction LFSR17 prend bien les 2^17 - 1 entrées possibles :
-print(test_LFSR17())
+#print(test_LFSR17())
 
 
 ### QUESTION 2 ###
 
 ### Programmer le second LFSR de 25 bits.
 ### Ce LFSR possède quatre coefficients de rétroaction non-nuls : 12, 4, 3 et 0.
+
+def LFSR_25(s, l):
+    ''' Le LFSR prend en entrée un état s = (s0, s1, ..., s24) qui est une chaîne de caractères de taille 25,
+    où chaque caractère correspond à un bit de l'état initial. l est la taille du résultat que l'on veut en sortie'''
+
+    # Vérification que s est bien de taille 25
+    if len(s) != 25:
+        raise Exception("L'entrée s doit être de taille 17")
+    
+    # Vérification que s ne contient pas que des 0
+    if '1' not in s:
+        raise Exception("L'entrée s ne doit pas être composée uniquement de 0")
+
+    y = ''  # initialisation de la suite binaire y
+
+    for tour in range(l):   # à chaque coup d'horloge
+        y += s[0]   # ajout de s0 à y
+        b = str(XOR ( str(XOR(s[12], s[4])) , str(XOR(s[3], s[0])) ))   # calcul du bit b = (s12 XOR s4) XOR (s3 XOR s0)
+        s = DecaleRegistre(s) + b      # décalage du registre et ajout de b en position n-1
+
+    return y
+
+
+## Pour tester ce LFSR :
+
+s2_test = '0100110001110000111100000'    # remplacez par ce que vous voulez
+taille_sortie_s2 = 8   # remplacez par la taille souhaitée
+#print(LFSR_25(s2_test, taille_sortie_s2))
