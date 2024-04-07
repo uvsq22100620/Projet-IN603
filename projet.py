@@ -177,6 +177,9 @@ def chiffrement_CSS(m, k):
 
 ## Pour tester le chiffrement avec CSS :
 
-m_test = '1111111111111111111111111111111111111111'     # message à chiffrer
+m_test = '1111111111111111111111111111111111111111'     # message à chiffrer : m = 0xffffffffff
 k_test = '0000000000000000000000000000000000000000'     # clé de 40 bits
-print(chiffrement_CSS(m_test, k_test))
+resultat_attendu = '1111 1111 1111 1111 1011 0110 0110 1100 0011 1001'      # c = 0xffffb66c39
+resultat_obtenu = chiffrement_CSS(m_test, k_test)
+print(resultat_obtenu)
+print(resultat_obtenu == resultat_attendu)
