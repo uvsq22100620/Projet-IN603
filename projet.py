@@ -9,14 +9,15 @@
 
 def XOR(x,y):
     ''' Retourne x XOR y, où x et y appartiennent à {0,1} '''
+    # Cette fonction sera utilisée tout au long du projet
 
     if (x not in ('0','1')) or (y not in ('0','1')):
         raise Exception("x et y doivent appartenir à {0,1}")
     
-    return abs(int(x)-int(y))     # si x = y alors x - y = 0 => x XOR y = 0
-                        # si x != y alors x - y = 1 si x = 1 et y = 0
-                        #                 x - y = -1 si x = 0 et y = 1
-                        # => abs(x - y) = 1
+    return abs(int(x)-int(y))   # si x = y alors x - y = 0 => x XOR y = 0
+                                # si x != y alors x - y = 1 si x = 1 et y = 0
+                                #                 x - y = -1 si x = 0 et y = 1
+                                # => abs(x - y) = 1
 
 
 def DecaleRegistre(s):
@@ -113,3 +114,69 @@ def LFSR_25(s, l):
 s2_test = '0100110001110000111100000'    # remplacez par ce que vous voulez
 taille_sortie_s2 = 8   # remplacez par la taille souhaitée
 #print(LFSR_25(s2_test, taille_sortie_s2))
+
+
+### QUESTION 3 ###
+
+### Programmer l'opération de chiffrement et de déchiffrement d'un texte avec CSS.
+
+def Grand_XOR(x, y):
+    ''' Retourne le XOR entre deux nombres binaires (de taille supérieure à 1)'''
+
+    # Dans notre cas, x et y auront la même taille donc il n'est pas nécessaire
+    # de vérifier cette condition. Sinon, il aurait fallut rajouter autant de 0
+    # à gauche du plus petit nombre pour qu'il ait la même taille que le plus grand
+
+    res = ''
+    retenue = [0 for k in range(len(x))]    # initialisation des retenues (toutes à 0 pour le moment)
+
+    for b in range(len(x)-1, -1, -1):      # effectue l'opération de droite à gauche
+        t = int(x[b]) + int(y[b]) + retenue[b]
+        res = str(t%2) + res
+        if t >= 2:      # ajout de la retenue
+            if b > 0:
+                retenue[b-1] = 1
+            else :
+                res = '1' + res
+    
+    return res
+
+#print(Grand_XOR('01011011', '10110110'))
+#print(Grand_XOR('1111', '1111'))
+
+def chiffrement_CSS(m, k):
+    ''' Simule le chiffrement d'un message clair m avec la clé k grâce au chiffrement à flot CSS'''
+
+    # Vérification que s est bien de taille 40
+    if len(k) != 40:
+        raise Exception("L'entrée s doit être de taille 17")
+    
+    ### Génération de la suite s ###
+    taille_m = len(m)
+    s = ''      # initialisation de la suite s qui sera ensuite XORée avec le message clair m
+    c = 0       # initialisation de c
+
+    while len(s) < taille_m:
+        x = int(LFSR_17('1' + k[:16], 8)[::-1], 2)        # il faut inverser le résultat du LFSR car le premier bit
+        y = int(LFSR_25('1' + k[16:], 8)[::-1], 2)        # sorti de chaque LFSR est le bit de poids faible de x et y
+        z = (x + y + c) % 256
+        s += bin(z)[2:]
+        if (x + y) > 255:
+            c = 1
+        else:
+            c = 0
+    
+    ### Chiffrement de m en faisant un XOR avec s ###
+
+    s = s[:taille_m]
+    #print('s', s)
+    chiffre = Grand_XOR(m, s)
+
+    return chiffre
+
+
+## Pour tester le chiffrement avec CSS :
+
+m_test = '1111111111111111111111111111111111111111'     # message à chiffrer
+k_test = '0000000000000000000000000000000000000000'     # clé de 40 bits
+print(chiffrement_CSS(m_test, k_test))
