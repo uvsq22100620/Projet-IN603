@@ -46,14 +46,15 @@ def LFSR_17(s, l):
         b = str(XOR(s[14], s[0]))   # calcul du bit b = s0 XOR s14
         s = DecaleRegistre(s) + b      # décalage du registre et ajout de b en position n-1
 
-    return y
+    return (y,s)       # on retourne le résultat ainsi que l'état du LFSR à la fin
+         # (nécessaire pour garder l'historique et relancer ensuite le LFSR avec ce dernier état, cf question 3)
 
 
 ## Pour tester ce LFSR :
 
 s1_test = '10110010100011000'    # remplacez par ce que vous voulez
 taille_sortie_s1 = 8   # remplacez par la taille souhaitée
-#print(LFSR_17(s1_test, taille_sortie_s1))
+#print(LFSR_17(s1_test, taille_sortie_s1)[0])
 
 
 ### Implementer une fonction de test qui vérifie que l'état prend bien les 2^17 - 1 valeurs différentes
@@ -106,14 +107,14 @@ def LFSR_25(s, l):
         b = str(XOR ( str(XOR(s[12], s[4])) , str(XOR(s[3], s[0])) ))   # calcul du bit b = (s12 XOR s4) XOR (s3 XOR s0)
         s = DecaleRegistre(s) + b      # décalage du registre et ajout de b en position n-1
 
-    return y
+    return (y,s)
 
 
 ## Pour tester ce LFSR :
 
 s2_test = '0100110001110000111100000'    # remplacez par ce que vous voulez
 taille_sortie_s2 = 8   # remplacez par la taille souhaitée
-#print(LFSR_25(s2_test, taille_sortie_s2))
+#print(LFSR_25(s2_test, taille_sortie_s2)[0])
 
 
 ### QUESTION 3 ###
@@ -128,58 +129,148 @@ def Grand_XOR(x, y):
     # à gauche du plus petit nombre pour qu'il ait la même taille que le plus grand
 
     res = ''
-    retenue = [0 for k in range(len(x))]    # initialisation des retenues (toutes à 0 pour le moment)
 
     for b in range(len(x)-1, -1, -1):      # effectue l'opération de droite à gauche
-        t = int(x[b]) + int(y[b]) + retenue[b]
-        res = str(t%2) + res
-        if t >= 2:      # ajout de la retenue
-            if b > 0:
-                retenue[b-1] = 1
-            else :
-                res = '1' + res
+        res = str(XOR(x[b], y[b])) + res
     
     return res
 
 #print(Grand_XOR('01011011', '10110110'))
 #print(Grand_XOR('1111', '1111'))
 
-def chiffrement_CSS(m, k):
-    ''' Simule le chiffrement d'un message clair m avec la clé k grâce au chiffrement à flot CSS'''
 
-    # Vérification que s est bien de taille 40
-    if len(k) != 40:
-        raise Exception("L'entrée s doit être de taille 17")
-    
-    ### Génération de la suite s ###
+def Genere_s(m, k):
+    ''' Permet de générer la suite s'''
+
     taille_m = len(m)
     s = ''      # initialisation de la suite s qui sera ensuite XORée avec le message clair m
     c = 0       # initialisation de c
+    s1 = k[:16] + '1'       # initialisation de s1
+    s2 = k[16:] + '1'       # et s2 (à partir de la clé)
 
-    while len(s) < taille_m:
-        x = int(LFSR_17('1' + k[:16], 8)[::-1], 2)        # il faut inverser le résultat du LFSR car le premier bit
-        y = int(LFSR_25('1' + k[16:], 8)[::-1], 2)        # sorti de chaque LFSR est le bit de poids faible de x et y
+    while len(s) < taille_m:        # pour que la taille de s soit supérieure ou égale à la taille de m
+
+        # On fait tourner les 2 LFSR avec s1 en entrée pour celui de 17 bits et s2 pour celui de 25 bits
+        # On veut récupérer un octet par LFSR
+        res1 = LFSR_17(s1, 8)
+        res2 = LFSR_25(s2, 8)
+
+        # Stockage de ces octets dans x (pour LFSR_17) et y (pour LFSR_25) et conversion en décimal
+        x = int(res1[0][::-1], 2)           # il faut inverser le résultat du LFSR car le premier bit
+        y = int(res2[0][::-1], 2)           # sorti de chaque LFSR est le bit de poids faible de x et y
+
+        # On récupère aussi l'état des LFSR après avoir sorti l'octet x ou y ;
+        # ce sera la configuration utilisée pour relancer le LFSR pour produire le prochain octet
+        s1 = res1[1]
+        s2 = res2[1]
+
+        # Calcul de z
         z = (x + y + c) % 256
-        s += bin(z)[2:]
+
+        # Ajout de l'octet z à s
+        s += bin(z)[2:].zfill(8)        # il faut d'abord le convertir en binaire et ajouter à gauche
+                                        # autant de 0 que nécessaire pour avoir 8 bits
+
+        # Calcul de c
         if (x + y) > 255:
             c = 1
         else:
             c = 0
+
+    return s[:taille_m]    # on retire les bits de gauche en trop de s pour que s et m aient la même taille
+
+
+def chiffrement_CSS(m, k):
+    ''' Simule le chiffrement d'un message clair m avec la clé k grâce au chiffrement à flot CSS'''
+
+    # Vérification que k est bien de taille 40
+    if len(k) != 40:
+        raise Exception("k doit être de taille 40")
+    
+    ### Génération de la suite s ###
+    s = Genere_s(m, k)
     
     ### Chiffrement de m en faisant un XOR avec s ###
+    chiffre = Grand_XOR(m, s)       # Production de c = m XOR s
 
-    s = s[:taille_m]
-    #print('s', s)
-    chiffre = Grand_XOR(m, s)
-
-    return chiffre
+    return chiffre      # on retourne le chiffré
 
 
 ## Pour tester le chiffrement avec CSS :
 
-m_test = '1111111111111111111111111111111111111111'     # message à chiffrer : m = 0xffffffffff
-k_test = '0000000000000000000000000000000000000000'     # clé de 40 bits
-resultat_attendu = '1111 1111 1111 1111 1011 0110 0110 1100 0011 1001'      # c = 0xffffb66c39
-resultat_obtenu = chiffrement_CSS(m_test, k_test)
-print(resultat_obtenu)
-print(resultat_obtenu == resultat_attendu)
+def affiche_resultat_chiffrement():
+    ''' Permet l'affichage des résultats '''
+
+    m_test = '1111111111111111111111111111111111111111'     # message à chiffrer : m = 0xffffffffff
+    k_test = '0000000000000000000000000000000000000000'     # clé de 40 bits
+    resultat_attendu = '1111111111111111101101100110110000111001'      # c = 0xffffb66c39
+    resultat_obtenu = chiffrement_CSS(m_test, k_test)
+
+    if resultat_obtenu == resultat_attendu:
+        print("Le chiffrement CSS a permis d'obtenir le bon résultat.")
+        print("message : ", m_test)
+        print("clé : ", k_test)
+        print("chiffré obtenu par le chiffrement CSS : ", resultat_obtenu)
+        print("en hexadécimal : ", hex(int(resultat_obtenu,2)))
+    else:
+        print("Le résultat obtenu n'est pas celui attendu.")
+
+
+#print(affiche_resultat_chiffrement())
+
+
+### Vérifier que le déchiffrement se passe correctement.
+
+# On sait que ci = si XOR mi <=> mi = si XOR ci
+# Pour retrouver le message clair m, il faudra donc le chiffré mais il faudra aussi reproduire s.
+# Pour reproduire s, il suffit de réaliser exactement les mêmes étapes que lors de la production
+# de s pour le chiffrement. On utilise les mêmes LFSR initialisés de la même façon, avec la même
+# clé et les mêmes coefficients de rétroactions associés aux LFSR.
+
+
+## Voici la fonction de déchiffrement :
+
+def dechiffrement_CSS(c, k):
+    ''' Simule le déchiffrement d'un chiffré c avec la clé k'''
+
+    # Vérification que k est bien de taille 40
+    if len(k) != 40:
+        raise Exception("k doit être de taille 40")
+    
+    ### Génération de la suite s ###
+    s = Genere_s(c, k)
+    
+    ### Déchiffrement de c en faisant un XOR avec s ###
+    clair = Grand_XOR(c, s)       # Production de m = c XOR s
+
+    return clair      # on retourne le clair
+
+
+## Pour tester le déchiffrement avec CSS (même exemple) :
+
+def affiche_resultat_dechiffrement():
+    ''' Permet l'affichage des résultats '''
+
+    c_test = '1111111111111111101101100110110000111001'     # obtenu grâce à chiffrement_CSS(m_test, k_test)
+    k_test = '0000000000000000000000000000000000000000'     # clé de 40 bits (la même que pour le chiffrement)
+    resultat_obtenu = dechiffrement_CSS(c_test, k_test)
+    resultat_attendu = '1111111111111111111111111111111111111111'   # c'est m_test
+
+    if resultat_obtenu == resultat_attendu:
+        print("Le déchiffrement CSS a permis d'obtenir le bon résultat.")
+        print("chiffré : ", c_test)
+        print("clé : ", k_test)
+        print("clair obtenu par le déchiffrement : ", resultat_obtenu)
+        print("en hexadécimal : ", hex(int(resultat_obtenu,2)))
+    else:
+        print("Le résultat obtenu n'est pas celui attendu.")
+
+
+#print(affiche_resultat_dechiffrement())
+
+
+### QUESTION 6 ###
+
+### Programmer l'attaque contre ce générateur. Pour cela, initialiser le générateur avec une
+### valeur aléatoire s appartenant à {0,1}^40 et générer par la suite 6 octets z1, z2, ..., z6.
+### Vérifier que votre attaque permet de bien retrouver l'état initial.
