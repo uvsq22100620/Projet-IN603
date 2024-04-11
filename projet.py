@@ -274,3 +274,27 @@ def affiche_resultat_dechiffrement():
 ### Programmer l'attaque contre ce générateur. Pour cela, initialiser le générateur avec une
 ### valeur aléatoire s appartenant à {0,1}^40 et générer par la suite 6 octets z1, z2, ..., z6.
 ### Vérifier que votre attaque permet de bien retrouver l'état initial.
+
+
+def attaque_CSS():
+    ''' '''
+
+    # Tester toutes les suites s1 de 16 bits possibles
+    for s1 in range(65535) :        # 2^16 - 1 = 65535
+        s1 = bin(s1)
+
+    return
+
+
+from random import randint
+
+def test_attaque_CSS():
+    ''' '''
+
+    # Génération de la clé
+    k = ''
+    for i in range(40):
+        k = k + randint(0, 1)
+
+    # Test
+    
