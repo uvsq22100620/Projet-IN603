@@ -52,8 +52,8 @@ def LFSR_17(s, l):
 
 ## Pour tester ce LFSR :
 
-s1_test = '10110010100011000'    # remplacez par ce que vous voulez
-taille_sortie_s1 = 8   # remplacez par la taille souhaitée
+s1_test = '00000000000000001'    # remplacez par ce que vous voulez
+taille_sortie_s1 = 48   # remplacez par la taille souhaitée
 #print(LFSR_17(s1_test, taille_sortie_s1)[0])
 
 
@@ -112,8 +112,8 @@ def LFSR_25(s, l):
 
 ## Pour tester ce LFSR :
 
-s2_test = '0100110001110000111100000'    # remplacez par ce que vous voulez
-taille_sortie_s2 = 8   # remplacez par la taille souhaitée
+s2_test = '0000000000000000000000001'    # remplacez par ce que vous voulez
+taille_sortie_s2 = 48   # remplacez par la taille souhaitée
 #print(LFSR_25(s2_test, taille_sortie_s2)[0])
 
 
@@ -139,10 +139,9 @@ def Grand_XOR(x, y):
 #print(Grand_XOR('1111', '1111'))
 
 
-def Genere_s(m, k):
+def Genere_s(taille_m, k):
     ''' Permet de générer la suite s'''
 
-    taille_m = len(m)
     s = ''      # initialisation de la suite s qui sera ensuite XORée avec le message clair m
     c = 0       # initialisation de c
     s1 = k[:16] + '1'       # initialisation de s1
@@ -188,7 +187,7 @@ def chiffrement_CSS(m, k):
         raise Exception("k doit être de taille 40")
     
     ### Génération de la suite s ###
-    s = Genere_s(m, k)
+    s = Genere_s(len(m), k)
     
     ### Chiffrement de m en faisant un XOR avec s ###
     chiffre = Grand_XOR(m, s)       # Production de c = m XOR s
@@ -238,7 +237,7 @@ def dechiffrement_CSS(c, k):
         raise Exception("k doit être de taille 40")
     
     ### Génération de la suite s ###
-    s = Genere_s(c, k)
+    s = Genere_s(len(c), k)
     
     ### Déchiffrement de c en faisant un XOR avec s ###
     clair = Grand_XOR(c, s)       # Production de m = c XOR s
@@ -276,25 +275,93 @@ def affiche_resultat_dechiffrement():
 ### Vérifier que votre attaque permet de bien retrouver l'état initial.
 
 
-def attaque_CSS():
-    ''' '''
+def test_s1_s2(s2, x1_a_x6, liste_z1_a_z6, c):
+    ''' Retourne True si z4, z5 et z6 calculés à partir de x1, x2, ... x6 et y1, y2, ..., y6
+        correspondent bien à ceux attendus, retourne False sinon '''    
 
-    # Tester toutes les suites s1 de 16 bits possibles
-    for s1 in range(65535) :        # 2^16 - 1 = 65535
-        s1 = bin(s1)
+    y1_a_y6 = LFSR_25(s2, 48)[0]
 
-    return
+    for i in range(3):          # Génération de z4, z5 et z6
 
+        x = int(x1_a_x6[8*(3+i):8*(4+i)][::-1], 2)
+        y = int(y1_a_y6[8*(3+i):8*(4+i)][::-1], 2)
+        z_calcule = bin((x + y + c) % 256)[2:].zfill(8)
+
+        # Test pour savoir si le z calculé est égal à celui attendu
+        if z_calcule != liste_z1_a_z6[i+3]:
+            return False
+        
+        # Calcul de c
+        if (x + y) > 255:
+            c = 1
+        else:
+            c = 0
+    
+    return True
+
+
+def attaque_CSS(liste_z1_a_z6):
+    ''' Réalise l'attaque contre CSS '''
+
+    ## Tester toutes les suites s1 de 16 bits possibles
+    for s1 in range(65536) :
+        s1 = bin(s1)[2:].zfill(16) + '1'
+        if len(s1) != 17:
+            print('Il y a un problème car s1 = ', s1)
+        x1_a_x6 = LFSR_17(s1, 48)[0]   # on fait tourner le premier LFSR pour obtenir les 6 octets x1 à x6
+
+        ## Calcul de s2
+        c = 0       # initialisation de c
+        s2 = ''     # initialisation de s2
+
+        for i in range(3):      # pour calculer y1, y2 et y3
+
+            z = int(liste_z1_a_z6[i], 2)
+            x = int(x1_a_x6[8*i:8*(i+1)][::-1], 2)
+            y = (z - x - c) % 256
+
+            # Ajout de y à s2
+            s2 += bin(y)[2:].zfill(8)
+
+            # Calcul de c
+            if (x + y) > 255:
+                c = 1
+            else:
+                c = 0
+
+        s2 += '1'
+
+        ## Test du couple (s1, s2)
+        if test_s1_s2(s2, x1_a_x6, liste_z1_a_z6, c) :
+            return (s1, s2)
+        # si la condition n'est pas vérifiée alors un autre s1 sera testé
+
+    return " Aucune clé trouvée"
+
+#suite_z_test = ['00000000', '00000000', '01001001', '10010011', '11000110', '11001001']
+#print(attaque_CSS(suite_z_test2))
+#print(test_s1_s2('0000000000000000000000001', '000000000000000010010010010010010110010110010110', suite_z_test, 0))
 
 from random import randint
 
 def test_attaque_CSS():
-    ''' '''
+    ''' Teste l'attaque '''
 
     # Génération de la clé
     k = ''
     for i in range(40):
-        k = k + randint(0, 1)
+        k = k + str(randint(0, 1))
+    print('k : ', k)
 
-    # Test
+    # Génération des six octets z1, z2, ..., z6
+    s = Genere_s(48, k)     # production de s avec la clé k
+    liste_z1_a_z6 = []
+    for i in range(6):
+        liste_z1_a_z6.append(s[i*8:(i+1)*8])
+    print('z : ', liste_z1_a_z6)
     
+    # Test
+    print(attaque_CSS(liste_z1_a_z6))
+
+
+test_attaque_CSS()
