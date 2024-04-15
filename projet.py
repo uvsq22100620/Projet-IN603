@@ -2,10 +2,12 @@
 ##### LE CORRE Camille - LEFEVRE Laura - LDD BI #####
 
 
+
 ### QUESTION 1 ###
 
 ### Programmer le premier LFSR de 17 bits où l'état sera représenté par une seule variable.
 ### Ce LFSR possède deux coefficients de rétroaction non-nuls : 0 et 14.
+
 
 def XOR(x,y):
     ''' Retourne x XOR y, où x et y appartiennent à {0,1} '''
@@ -20,11 +22,13 @@ def XOR(x,y):
                                 # => abs(x - y) = 1
 
 
+
 def DecaleRegistre(s):
     ''' Décale tous les bits du registre d'un indice plus faible.
     La chaine de caractères renvoyée et donc d'une taille plus petite (de 1) que celle de l'entrée '''
 
     return s[1:]
+
 
 
 def LFSR_17(s, l):
@@ -50,11 +54,13 @@ def LFSR_17(s, l):
          # (nécessaire pour garder l'historique et relancer ensuite le LFSR avec ce dernier état, cf question 3)
 
 
+
 ## Pour tester ce LFSR :
 
 s1_test = '00000000000000001'    # remplacez par ce que vous voulez
 taille_sortie_s1 = 48   # remplacez par la taille souhaitée
-#print(LFSR_17(s1_test, taille_sortie_s1)[0])
+print(LFSR_17(s1_test, taille_sortie_s1)[0])
+
 
 
 ### Implementer une fonction de test qui vérifie que l'état prend bien les 2^17 - 1 valeurs différentes
@@ -62,6 +68,7 @@ taille_sortie_s1 = 48   # remplacez par la taille souhaitée
 
 # Il y 2^17 suites différentes de 17 bits. Cependant, nous ne voulons pas de la suite s composée uniquement de 0.
 # Donc il existe 2^17 - 1 = 131 071 suites non-nulles de taille 17.
+
 
 def test_LFSR17():
     ''' En énumérant les nombres binaires de 1 à 131 071, on va tester tous les cas possibles d'entrée pour ce LFSR.
@@ -80,13 +87,15 @@ def test_LFSR17():
 
 
 ## Pour tester que la fonction LFSR17 prend bien les 2^17 - 1 entrées possibles :
-#print(test_LFSR17())
+print(test_LFSR17())
+
 
 
 ### QUESTION 2 ###
 
 ### Programmer le second LFSR de 25 bits.
 ### Ce LFSR possède quatre coefficients de rétroaction non-nuls : 12, 4, 3 et 0.
+
 
 def LFSR_25(s, l):
     ''' Le LFSR prend en entrée un état s = (s0, s1, ..., s24) qui est une chaîne de caractères de taille 25,
@@ -110,16 +119,19 @@ def LFSR_25(s, l):
     return (y,s)
 
 
+
 ## Pour tester ce LFSR :
 
 s2_test = '0000000000000000000000001'    # remplacez par ce que vous voulez
 taille_sortie_s2 = 48   # remplacez par la taille souhaitée
-#print(LFSR_25(s2_test, taille_sortie_s2)[0])
+print(LFSR_25(s2_test, taille_sortie_s2)[0])
+
 
 
 ### QUESTION 3 ###
 
 ### Programmer l'opération de chiffrement et de déchiffrement d'un texte avec CSS.
+
 
 def Grand_XOR(x, y):
     ''' Retourne le XOR entre deux nombres binaires (de taille supérieure à 1)'''
@@ -135,8 +147,6 @@ def Grand_XOR(x, y):
     
     return res
 
-#print(Grand_XOR('01011011', '10110110'))
-#print(Grand_XOR('1111', '1111'))
 
 
 def Genere_s(taille_m, k):
@@ -179,6 +189,7 @@ def Genere_s(taille_m, k):
     return s[:taille_m]    # on retire les bits de gauche en trop de s pour que s et m aient la même taille
 
 
+
 def chiffrement_CSS(m, k):
     ''' Simule le chiffrement d'un message clair m avec la clé k grâce au chiffrement à flot CSS'''
 
@@ -193,6 +204,7 @@ def chiffrement_CSS(m, k):
     chiffre = Grand_XOR(m, s)       # Production de c = m XOR s
 
     return chiffre      # on retourne le chiffré
+
 
 
 ## Pour tester le chiffrement avec CSS :
@@ -210,12 +222,13 @@ def affiche_resultat_chiffrement():
         print("message : ", m_test)
         print("clé : ", k_test)
         print("chiffré obtenu par le chiffrement CSS : ", resultat_obtenu)
-        print("en hexadécimal : ", hex(int(resultat_obtenu,2)))
+        return "en hexadécimal : " + str(hex(int(resultat_obtenu,2)))
     else:
-        print("Le résultat obtenu n'est pas celui attendu.")
+        return "Le résultat obtenu n'est pas celui attendu."
 
 
-#print(affiche_resultat_chiffrement())
+print(affiche_resultat_chiffrement())
+
 
 
 ### Vérifier que le déchiffrement se passe correctement.
@@ -228,6 +241,7 @@ def affiche_resultat_chiffrement():
 
 
 ## Voici la fonction de déchiffrement :
+
 
 def dechiffrement_CSS(c, k):
     ''' Simule le déchiffrement d'un chiffré c avec la clé k'''
@@ -247,6 +261,7 @@ def dechiffrement_CSS(c, k):
 
 ## Pour tester le déchiffrement avec CSS (même exemple) :
 
+
 def affiche_resultat_dechiffrement():
     ''' Permet l'affichage des résultats '''
 
@@ -260,12 +275,13 @@ def affiche_resultat_dechiffrement():
         print("chiffré : ", c_test)
         print("clé : ", k_test)
         print("clair obtenu par le déchiffrement : ", resultat_obtenu)
-        print("en hexadécimal : ", hex(int(resultat_obtenu,2)))
+        return "en hexadécimal : " + str(hex(int(resultat_obtenu,2)))
     else:
-        print("Le résultat obtenu n'est pas celui attendu.")
+        return "Le résultat obtenu n'est pas celui attendu."
 
 
-#print(affiche_resultat_dechiffrement())
+print(affiche_resultat_dechiffrement())
+
 
 
 ### QUESTION 6 ###
@@ -277,9 +293,11 @@ def affiche_resultat_dechiffrement():
 
 def test_s1_s2(s2, x1_a_x6, liste_z1_a_z6, c):
     ''' Retourne True si z4, z5 et z6 calculés à partir de x1, x2, ... x6 et y1, y2, ..., y6
-        correspondent bien à ceux attendus, retourne False sinon '''    
+        correspondent bien à ceux attendus, retourne False sinon.
+        Cette fonction est utilisée dans la fonction attaque_CSS pour tester les s1 candidats'''
 
-    y1_a_y6 = LFSR_25(s2, 48)[0]
+    y1_a_y6 = LFSR_25(s2, 48)[0]    # faire tourner le LFSR de 25 bits avec l'état initial s2
+                                    # on veut récupérer 6 octets (y1 à y6)
 
     for i in range(3):          # Génération de z4, z5 et z6
 
@@ -301,27 +319,18 @@ def test_s1_s2(s2, x1_a_x6, liste_z1_a_z6, c):
 
 
 
-
-#suite_z_test = ['00000000', '00000000', '01001001', '10010011', '11000110', '11001001']
-#print(attaque_CSS(suite_z_test2))
-#print(test_s1_s2('0000000000000000000000001', '000000000000000010010010010010010110010110010110', suite_z_test, 0))
-
-from random import randint
-
-
-
-
 def attaque_CSS(liste_z1_a_z6):
+    ''' A partir des 6 octets z1, z2, ..., z6, renvoie les deux états initiaux s1 et s2 des deux LFSR
+        Cette attaque est de complexité 2^16'''
 
-    for s1 in range(65536) :
-        s1 = bin(s1)[2:].zfill(16) + '1'
-        x1_a_x6 = LFSR_17(s1, 48)[0] 
-        ## Tester toutes les suites s1 de 16 bits possibles
+    ## Tester toutes les suites s1 de 16 bits possibles
+    for s1 in range(65536) :        # 2^16 = 65536
+        s1 = bin(s1)[2:].zfill(16) + '1'    # transformer le chiffre en binaire, lui ajouter des 0 pour qu'il soit
+                                            # de taille 16 puis ajouter le 1 en bit de poids fort    
         
-        #s1 = k[:16] + '1'
         x1_a_x6 = LFSR_17(s1, 48)[0]   # on fait tourner le premier LFSR pour obtenir les 6 octets x1 à x6
         x_l = []
-        for i in range(6):
+        for i in range(6):      # on place les octets dans une liste
             x_l.append(x1_a_x6[i*8:(i+1)*8][::-1])
 
         ## Calcul de s2
@@ -346,18 +355,25 @@ def attaque_CSS(liste_z1_a_z6):
         s2 += '1'
 
         ## Test du couple (s1, s2)
-        if test_s1_s2(s2, x1_a_x6, liste_z1_a_z6, c) :
+        if test_s1_s2(s2, x1_a_x6, liste_z1_a_z6, c):   # Permet de déterminer si le s1 testé est le bon
+                                                        # Appel de la fonction test_s1_s2 qui va comparer les octets z attendus
+                                                        # et calculés (cf. la docstring de la fonction pour plus de détails)
             return (s1, s2)
+        # Remaque : si on veut récupérer la clé k, il suffit de concaténer s1 et s2 sans leur bit de poids fort
 
         # si la condition n'est pas vérifiée alors un autre s1 sera testé
     
     return 'Aucune clé trouvée'
 
 
+
+from random import randint
+
+
 def test_attaque_CSS():
     ''' Teste l'attaque '''
-    print('coucou')
-    # Génération de la clé
+
+    # Génération de la clé au hasard
     k = ''
     for i in range(40):
         k = k + str(randint(0, 1))
@@ -370,8 +386,13 @@ def test_attaque_CSS():
         liste_z1_a_z6.append(s[i*8:(i+1)*8])
     print('z : ', liste_z1_a_z6)
     
-    # Test
+    # Attaque pour essayer de retrouver la clé à partir des octets z1 à z6
     resultat = attaque_CSS(liste_z1_a_z6)
+
+    # Affichage du résultat
+    if resultat == 'Aucune clé trouvée':
+        return 'Aucune clé trouvée'
+    
     print('Le couple (s1, s2) trouvé est : ', resultat)
 
     if (resultat[0] == k[:16]+'1') and (resultat[1] == k[16:]+'1'):
@@ -381,116 +402,3 @@ def test_attaque_CSS():
 
 
 print(test_attaque_CSS())
-
-#k = '1010000001110000001010000001111010000100'
-#k = '0000000000000000000000000000000000000000'
-#k = '1000010010001110000100110100110010011000'
-#print(attaque_CSS(['11101001', '10100011', '00100010', '11001111', '10000101', '11001111']))
-#z = Genere_s(48, k)
-#print('z = ', z)
-#z_l = []
-#for i in range(6):
-#        z_l.append(z[i*8:(i+1)*8])
-#print('z_l = ', z_l)
-#print('resultat : ', debug(k, z_l))
-
-#print(attaque_CSS(['00000000', '00000000', '01001001', '10010011', '11000110', '11001001']))
-#print(attaque_CSS(['00011001', '10000110', '10110100', '11011001', '11000101', '10111110']))
-
-#print(debug('10100000011100000', ['00011001', '10000110', '10110100', '11011001', '11000101', '10111110']))
-#'00000000 00000000 01001001 10010011 1100011011001001'
-#print('z = ', Genere_s(48, '1010000001110000001010000001111010000100'))
-#print(debug('00000000000000001', ['00000000', '00000000', '01001001', '10010010', '10100110', '00101101']))
-#print(trouvonslerreur('0000000000000000000000000000000000000000'))    
-#print(trouvonslerreur('1000010010001110000100110100110010011000'))
-#print(Genere_s(48, k))
-#s = '11101001 10100011 00100010 11001111 10000101 11001111'
-#print('les x : ', LFSR_17('10000100100011101', 48)[0])
-#x = '10000100 10001110 10010000 01001110 10011011 01001110'
-#print('y : ', LFSR_25('0110010100010101100100101', 48)[0])
-#y = '01100101 00010101 10010010 10100010 11100101 00000001'
-#'10100000 01110000 11001001 00011011 00000100 00001100'
-
-
-def debug(k, liste_z1_a_z6):
-    ## Tester toutes les suites s1 de 16 bits possibles
-    
-    s1 = k[:16] + '1'
-    #print('s1 : ', s1, len(s1))
-    x1_a_x6 = LFSR_17(s1, 48)[0]   # on fait tourner le premier LFSR pour obtenir les 6 octets x1 à x6
-    x_l = []
-    for i in range(6):
-        x_l.append(x1_a_x6[i*8:(i+1)*8][::-1])
-    #print('x_l = ', x_l)
-
-    ## Calcul de s2
-    c = 0       # initialisation de c
-    s2 = ''     # initialisation de s2
-
-    for i in range(3):      # pour calculer y1, y2 et y3
-        z = int(liste_z1_a_z6[i], 2)
-        #print('z = ', z)
-        x = int(x_l[i], 2)
-        #print('x = ', x)
-        y = (z - x - c) % 256
-        y_bin = bin(y)[2:].zfill(8)
-        #print('y = ', y, y_bin)
-
-        # Ajout de y à s2
-        s2 += y_bin[::-1]
-
-        # Calcul de c
-        if (x + y) > 255:
-            c = 1
-        else:
-            c = 0
-        #print('c = ', c)
-    s2 += '1'
-    #print('s2 : ', s2)
-    ## Test du couple (s1, s2)
-    if test_s1_s2(s2, x1_a_x6, liste_z1_a_z6, c) :
-        return (s1, s2)
-    #print('s2 attendu : ', k[16:]+'1', len(k[16:]+'1'))
-    #if (s2 == k[16:]+'1'):
-    #    return 'cest bon !'
-    #else:
-    #    return 'ntm'
-    # si la condition n'est pas vérifiée alors un autre s1 sera testé
-
-
-def ancien_attaque(liste_z1_a_z6):
-    ''' Réalise l'attaque contre CSS '''
-
-    ## Tester toutes les suites s1 de 16 bits possibles
-    for s1 in range(65536) :
-        s1 = bin(s1)[2:].zfill(16) + '1'
-        x1_a_x6 = LFSR_17(s1, 48)[0]   # on fait tourner le premier LFSR pour obtenir les 6 octets x1 à x6
-
-        ## Calcul de s2
-        c = 0       # initialisation de c
-        s2 = ''     # initialisation de s2
-
-        for i in range(3):      # pour calculer y1, y2 et y3
-
-            z = int(liste_z1_a_z6[i], 2)
-            x = int(x1_a_x6[8*i:8*(i+1)][::-1], 2)
-            #x = int(x1_a_x6[8*i:8*(i+1)], 2)
-            y = (z - x - c) % 256
-
-            # Ajout de y à s2
-            s2 += bin(y)[2:].zfill(8)
-
-            # Calcul de c
-            if (x + y) > 255:
-                c = 1
-            else:
-                c = 0
-
-        s2 += '1'
-
-        ## Test du couple (s1, s2)
-        if test_s1_s2(s2, x1_a_x6, liste_z1_a_z6, c) :
-            return (s1, s2)
-        # si la condition n'est pas vérifiée alors un autre s1 sera testé
-
-    return " Aucune clé trouvée"
