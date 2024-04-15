@@ -391,52 +391,52 @@ def debug(k, liste_z1_a_z6):
     ## Tester toutes les suites s1 de 16 bits possibles
 
     s1 = k[:16] + '1'
-    print('s1 : ', s1, len(s1))
+    #print('s1 : ', s1, len(s1))
     x1_a_x6 = LFSR_17(s1, 48)[0]   # on fait tourner le premier LFSR pour obtenir les 6 octets x1 à x6
     x_l = []
     for i in range(6):
         x_l.append(x1_a_x6[i*8:(i+1)*8][::-1])
-    print('x_l = ', x_l)
+    #print('x_l = ', x_l)
 
     ## Calcul de s2
     c = 0       # initialisation de c
     s2 = ''     # initialisation de s2
 
     for i in range(3):      # pour calculer y1, y2 et y3
-        print('coucou')
-        print('i = ', i)
         z = int(liste_z1_a_z6[i], 2)
-        print('z = ', z)
+        #print('z = ', z)
         x = int(x_l[i], 2)
-        print('x = ', x)
+        #print('x = ', x)
         y = (z - x - c) % 256
-        print('y = ', y)
+        y_bin = bin(y)[2:].zfill(8)
+        #print('y = ', y, y_bin)
 
         # Ajout de y à s2
-        s2 += bin(y)[2:].zfill(8)
+        s2 += y_bin[::-1]
 
         # Calcul de c
         if (x + y) > 255:
             c = 1
         else:
             c = 0
-        print('c = ', c)
+        #print('c = ', c)
     s2 += '1'
-    print('s2 : ', s2)
+    #print('s2 : ', s2)
     ## Test du couple (s1, s2)
-    #if test_s1_s2(s2, x1_a_x6, liste_z1_a_z6, c) :
-     #   return (s1, s2)
-    print('s2 attendu : ', k[16:])
-    if (s2 == k[16:]+'1'):
-        return 'cest bon !'
-    else:
-        return 'ntm'
+    if test_s1_s2(s2, x1_a_x6, liste_z1_a_z6, c) :
+        return (s1, s2)
+    #print('s2 attendu : ', k[16:]+'1', len(k[16:]+'1'))
+    #if (s2 == k[16:]+'1'):
+    #    return 'cest bon !'
+    #else:
+    #    return 'ntm'
     # si la condition n'est pas vérifiée alors un autre s1 sera testé
 
 
 
-k = '1010000001110000001010000001111010000100'
+#k = '1010000001110000001010000001111010000100'
 #k = '0000000000000000000000000000000000000000'
+k = '1000010010001110000100110100110010011000'
 z = Genere_s(48, k)
 #print('z = ', z)
 z_l = []
@@ -444,7 +444,6 @@ for i in range(6):
         z_l.append(z[i*8:(i+1)*8])
 print('z_l = ', z_l)
 print('resultat : ', debug(k, z_l))
-print('normalement : ', '1010000001110000001010000001111010000100'[16:])
 
 #print(attaque_CSS(['00000000', '00000000', '01001001', '10010011', '11000110', '11001001']))
 #print(attaque_CSS(['00011001', '10000110', '10110100', '11011001', '11000101', '10111110']))
