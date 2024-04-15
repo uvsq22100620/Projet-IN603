@@ -306,8 +306,6 @@ def attaque_CSS(liste_z1_a_z6):
     ## Tester toutes les suites s1 de 16 bits possibles
     for s1 in range(65536) :
         s1 = bin(s1)[2:].zfill(16) + '1'
-        if len(s1) != 17:
-            print('Il y a un problème car s1 = ', s1)
         x1_a_x6 = LFSR_17(s1, 48)[0]   # on fait tourner le premier LFSR pour obtenir les 6 octets x1 à x6
 
         ## Calcul de s2
@@ -318,6 +316,7 @@ def attaque_CSS(liste_z1_a_z6):
 
             z = int(liste_z1_a_z6[i], 2)
             x = int(x1_a_x6[8*i:8*(i+1)][::-1], 2)
+            #x = int(x1_a_x6[8*i:8*(i+1)], 2)
             y = (z - x - c) % 256
 
             # Ajout de y à s2
@@ -364,4 +363,102 @@ def test_attaque_CSS():
     print(attaque_CSS(liste_z1_a_z6))
 
 
-test_attaque_CSS()
+#test_attaque_CSS()
+
+def trouvonslerreur(k):
+    s1 = k[:16] + '1'
+    s2 = k[16:] + '1'
+    print('s1 : ', s1)
+    print('s2 : ', s2)
+
+    s = Genere_s(48, k)
+    print('s : ', s)
+
+    z = []
+    for i in range(6):
+        z.append(s[i*8:(i+1)*8])
+    print('z : ', z)
+
+    LFSR17 = LFSR_17(s1, 48)[0]
+    x = []
+    for i in range(6):
+        x.append(LFSR17[i*8:(i+1)*8][::-1])
+    print('x : ', x)
+
+    return 'fin'
+
+def debug(k, liste_z1_a_z6):
+    ## Tester toutes les suites s1 de 16 bits possibles
+
+    s1 = k[:16] + '1'
+    print('s1 : ', s1, len(s1))
+    x1_a_x6 = LFSR_17(s1, 48)[0]   # on fait tourner le premier LFSR pour obtenir les 6 octets x1 à x6
+    x_l = []
+    for i in range(6):
+        x_l.append(x1_a_x6[i*8:(i+1)*8][::-1])
+    print('x_l = ', x_l)
+
+    ## Calcul de s2
+    c = 0       # initialisation de c
+    s2 = ''     # initialisation de s2
+
+    for i in range(3):      # pour calculer y1, y2 et y3
+        print('coucou')
+        print('i = ', i)
+        z = int(liste_z1_a_z6[i], 2)
+        print('z = ', z)
+        x = int(x_l[i], 2)
+        print('x = ', x)
+        y = (z - x - c) % 256
+        print('y = ', y)
+
+        # Ajout de y à s2
+        s2 += bin(y)[2:].zfill(8)
+
+        # Calcul de c
+        if (x + y) > 255:
+            c = 1
+        else:
+            c = 0
+        print('c = ', c)
+    s2 += '1'
+    print('s2 : ', s2)
+    ## Test du couple (s1, s2)
+    #if test_s1_s2(s2, x1_a_x6, liste_z1_a_z6, c) :
+     #   return (s1, s2)
+    print('s2 attendu : ', k[16:])
+    if (s2 == k[16:]+'1'):
+        return 'cest bon !'
+    else:
+        return 'ntm'
+    # si la condition n'est pas vérifiée alors un autre s1 sera testé
+
+
+
+k = '1010000001110000001010000001111010000100'
+#k = '0000000000000000000000000000000000000000'
+z = Genere_s(48, k)
+#print('z = ', z)
+z_l = []
+for i in range(6):
+        z_l.append(z[i*8:(i+1)*8])
+print('z_l = ', z_l)
+print('resultat : ', debug(k, z_l))
+print('normalement : ', '1010000001110000001010000001111010000100'[16:])
+
+#print(attaque_CSS(['00000000', '00000000', '01001001', '10010011', '11000110', '11001001']))
+#print(attaque_CSS(['00011001', '10000110', '10110100', '11011001', '11000101', '10111110']))
+
+#print(debug('10100000011100000', ['00011001', '10000110', '10110100', '11011001', '11000101', '10111110']))
+#'00000000 00000000 01001001 10010011 1100011011001001'
+#print('z = ', Genere_s(48, '1010000001110000001010000001111010000100'))
+#print(debug('00000000000000001', ['00000000', '00000000', '01001001', '10010010', '10100110', '00101101']))
+#print(trouvonslerreur('0000000000000000000000000000000000000000'))    
+#print(trouvonslerreur('1000010010001110000100110100110010011000'))
+#print(Genere_s(48, k))
+#s = '11101001 10100011 00100010 11001111 10000101 11001111'
+#print('les x : ', LFSR_17('10000100100011101', 48)[0])
+#x = '10000100 10001110 10010000 01001110 10011011 01001110'
+#print('y : ', LFSR_25('0110010100010101100100101', 48)[0])
+#y = '01100101 00010101 10010010 10100010 11100101 00000001'
+#'10100000 01110000 11001001 00011011 00000100 00001100'
